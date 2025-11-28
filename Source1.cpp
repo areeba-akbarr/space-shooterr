@@ -1,5 +1,4 @@
 #include <iostream>
-#include "GlobalState.h"
 #include <cstdio >
 using namespace std;
 <<<<<<< HEAD
@@ -105,3 +104,4 @@ int main()
 {
 	
 }
+
