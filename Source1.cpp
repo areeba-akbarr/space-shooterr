@@ -290,6 +290,45 @@ int main(void) {
     return 0; // everything ran successfully
 }
 
+//game logic functions
+
+//starry background
+void SetupSparks() {
+    for (int i = 0; i < MAX_SPARKS; i++) {
+        allSparks[i].pos = (Vector2){ static_cast<float>(rand() % SCREEN_WIDTH), static_cast<float>(rand() % SCREEN_HEIGHT) };
+        allSparks[i].velocity = (Vector2){ 0.0f, 0.1f + static_cast<float>(rand() % 10) / 10.0f };
+        allSparks[i].size = static_cast<float>(rand() % 2) + 1.0f;
+        allSparks[i].sparkColor = WHITE;
+        allSparks[i].isVisible = true;
+    }
+}
+
+// resets beofre every level
+void InitializeGame() {
+    currentLevel = 1;
+    gridRows = 2;
+    gridCols = 5;
+    ufoMoveTimer = 0.0f;
+    ufoMoveDirection = 1.0f;
+    timeSinceLastUfoShot = 0.0f;
+    levelTransitionTimer = 0.0f;
+    levelResetExecuted = false;
+
+    thePlayer.hitBox = { SCREEN_WIDTH / 2.0f - SHIP_W / 2.0f,
+                       static_cast<float>(SCREEN_HEIGHT) - SHIP_H - 30,
+                       static_cast<float>(SHIP_W), static_cast<float>(SHIP_H) };
+    thePlayer.livesLeft = 3;
+    thePlayer.playerScore = 0;
+    thePlayer.fireCooldown = 0.0f;
+    thePlayer.tripleShotCooldown = 0.0f;
+
+    for (int i = 0; i < MAX_SHOTS; i++) {
+        allShots[i].isActive = false;
+    }
+
+    SetupWalls(); 
+    SetupUfos(gridRows, gridCols); 
+}
 
 
 
