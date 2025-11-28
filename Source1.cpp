@@ -331,34 +331,6 @@ void InitializeGame() {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // function for alien grid setup
 void SetupUfos(int rows, int cols) {
     currentUfosAlive = 0;
@@ -397,6 +369,145 @@ void SetupUfos(int rows, int cols) {
             currentUfosAlive++;
         }
     }
+}
+
+// defence walls
+void SetupWalls() {
+    float wallWidth = 100;
+    float wallHeight = 15;
+    // the gap between walls
+    float spacing = (static_cast<float>(SCREEN_WIDTH) - (NUM_WALLS * wallWidth)) / (NUM_WALLS + 1);
+    float startY = static_cast<float>(SCREEN_HEIGHT) - 200 + (90.0f / 2.0f) - (wallHeight / 2.0f);
+    for (int i = 0; i < NUM_WALLS; i++) {
+        allWalls[i].hitPoints = 4; 
+        allWalls[i].hitBox = {
+            spacing + static_cast<float>(i * (wallWidth + spacing)),
+            startY,
+            wallWidth,
+            wallHeight
+        };
+    }
+}
+
+
+void UpdateEverything(float frameTime) {
+    MoveShip(frameTime);
+    thePlayer.fireCooldown -= frameTime;
+    thePlayer.tripleShotCooldown -= frameTime;
+
+    // handle normal shooting input
+    if ((IsKeyPressed(KEY_SPACE) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) && thePlayer.fireCooldown <= 0) {
+        FireShot(thePlayer.hitBox, false, 0.0f);
+        thePlayer.fireCooldown = SHIP_FIRE_DELAY; // reset timers
+    }
+
+    // handle special triple shot input
+    if (IsKeyPressed(KEY_B) && thePlayer.tripleShotCooldown <= 0) {
+        FireTripleShot();
+    }
+
+    UfoShooting(frameTime);
+    MoveUfos(frameTime);
+    MoveShots(frameTime);
+    CheckHits(); //collisions checker
+    CheckIfLevelWon();
+
+    //game over condition checker
+    if (thePlayer.livesLeft <= 0) {
+        gameStatus = END_SCREEN;
+    }
+}
+
+// checks if player defeated all enemies in current wave
+void CheckIfLevelWon() {
+    if (currentUfosAlive <= 0) {
+        // We won! Start the fading transition.
+        levelTransitionTimer = 0.0f;
+        levelResetExecuted = false;
+        gameStatus = LEVEL_UP;
+    }
+}
+
+// prepares all game objects fornext level 
+void AdvanceLevel() {
+
+    // update score and level
+    int previousLevel = currentLevel;
+    currentLevel++; 
+    thePlayer.playerScore += 500 * previousLevel; 
+
+    // next wave harder
+    gridRows = KeepInBounds(gridRows + 1, 1, 5);
+    gridCols = KeepInBounds(gridCols + 1, 1, 10);
+
+    // resets game state
+    thePlayer.fireCooldown = 0.0f;
+    thePlayer.tripleShotCooldown = 0.0f;
+    for (int i = 0; i < MAX_SHOTS; i++) {
+        allShots[i].isActive = false;
+    }
+    SetupWalls();
+    SetupUfos(gridRows, gridCols); 
+
+    // resets timing.
+    ufoMoveTimer = 0.0f;
+    ufoMoveDirection = 1.0f;
+    timeSinceLastUfoShot = 0.0f;
+
+    // extra life
+    if (currentLevel % 3 == 0) {
+        thePlayer.livesLeft++;
+    }
+}
+
+//physics
+// moves the player ship left or right based on input
+void MoveShip(float frameTime) {
+    if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) {
+        thePlayer.hitBox.x -= thePlayer.speed;
+    }
+    if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) {
+        thePlayer.hitBox.x += thePlayer.speed;
+    }
+
+    // clamp the ship's horizontal position
+    thePlayer.hitBox.x = static_cast<float>(KeepInBounds(static_cast<int>(thePlayer.hitBox.x),
+        0, SCREEN_WIDTH - static_cast<int>(thePlayer.hitBox.width)));
+}
+
+// finds empty slot launches a single bullet
+void FireShot(Rectangle sourceBox, bool isUfo, float offsetX) {
+    
+    for (int i = 0; i < MAX_SHOTS; i++) {
+        if (!allShots[i].isActive) {
+            allShots[i].isActive = true;
+            allShots[i].firedByUfo = isUfo;
+            allShots[i].hitBox.width = SHOT_W;
+            allShots[i].hitBox.height = SHOT_H;
+
+            if (isUfo) {
+                // enemy moving down and faster
+                allShots[i].speedVal = 8.0f + static_cast<float>(currentLevel - 1) * 0.5f;
+                allShots[i].hitBox.y = sourceBox.y + sourceBox.height + 5;
+            }
+            else {
+                //players shots are moving up and faster
+                allShots[i].speedVal = 15.0f;
+                allShots[i].hitBox.y = sourceBox.y - allShots[i].hitBox.height;
+            }
+
+            allShots[i].hitBox.x = sourceBox.x + sourceBox.width / 2 - allShots[i].hitBox.width / 2 + offsetX;
+            break;
+        }
+    }
+}
+
+
+void FireTripleShot() {
+    thePlayer.tripleShotCooldown = TRIPLE_SHOT_DELAY;
+    FireShot(thePlayer.hitBox, false, -20.0f); //left
+    FireShot(thePlayer.hitBox, false, 0.0f);   //centre
+    FireShot(thePlayer.hitBox, false, 20.0f);  //right
 }
 
 
