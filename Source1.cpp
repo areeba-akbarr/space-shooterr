@@ -1,7 +1,8 @@
 #include <iostream>
 #include <cstdio >
 using namespace std;
-
+void LoadScoreFile();
+void SaveScoreFile();
 
 
 // function for alien grid setup
