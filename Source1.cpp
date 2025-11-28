@@ -160,6 +160,166 @@ void UnloadAllTextures() {
 }
 
 
+// main function
+int main(void) {
+
+    // 1. Setup
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Space Shooter - Survivors");
+    SetTargetFPS(60); 
+    srand(static_cast<unsigned int>(time(NULL)));
+
+    // loading
+    LoadScoreFile();
+    LoadAllTextures();
+    SetupSparks();
+    InitializeGame();
+
+    // 2.Game Loop
+    while (!WindowShouldClose()) {
+        float frameTime = GetFrameTime(); 
+
+        UpdateSparks(frameTime); //background starry
+
+        
+        switch (gameStatus) {
+        case INTRO_MENU:
+            if (IsKeyPressed(KEY_ENTER)) {
+                InitializeGame();
+                gameStatus = IN_GAME;
+            }
+            else if (IsKeyPressed(KEY_I)) {
+                gameStatus = HOW_TO_PLAY;
+            }
+            break;
+        case HOW_TO_PLAY:
+            if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_ESCAPE)) {
+                gameStatus = INTRO_MENU;
+            }
+            break;
+        case IN_GAME:
+            UpdateEverything(frameTime);
+            if (IsKeyPressed(KEY_P)) {
+                gameStatus = PAUSED_GAME;
+            }
+            break;
+        case PAUSED_GAME:
+            if (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_ENTER)) {
+                gameStatus = IN_GAME;
+            }
+            break;
+        case LEVEL_UP: 
+            levelTransitionTimer += frameTime; 
+
+            
+            if (levelTransitionTimer >= FADE_TIME && !levelResetExecuted) {
+                AdvanceLevel();
+                levelResetExecuted = true;
+            }
+
+            
+            if (levelTransitionTimer >= TOTAL_TRANSITION_TIME) {
+                gameStatus = IN_GAME;
+                levelTransitionTimer = 0.0f;
+            }
+            break;
+        case END_SCREEN:
+            
+            if (thePlayer.playerScore > highScore) {
+                highScore = thePlayer.playerScore;
+                SaveScoreFile();
+            }
+            if (IsKeyPressed(KEY_ENTER)) {
+                gameStatus = INTRO_MENU;
+            }
+            break;
+        }
+
+        // 3. drawing phase
+        BeginDrawing();
+        ClearBackground(BLACK); 
+
+        DrawSparks(); //stars
+
+        
+        switch (gameStatus) {
+        case INTRO_MENU:
+            DrawTheMenu();
+            break;
+        case HOW_TO_PLAY:
+            DrawHowToPlay();
+            break;
+        case IN_GAME:
+        case PAUSED_GAME:
+            DrawGameElements(); // ships, enemies, and UI.
+            if (gameStatus == PAUSED_GAME)
+                DrawPauseScreen();
+            break;
+        case END_SCREEN:
+            DrawGameElements(); 
+            DrawEndScreen();   
+            break;
+        case LEVEL_UP:
+            DrawGameElements(); 
+
+            float alpha = 0.0f; .
+
+            if (levelTransitionTimer < FADE_TIME) {
+                alpha = levelTransitionTimer / FADE_TIME;
+            }
+            else if (levelTransitionTimer < FADE_TIME + HOLD_TIME) {
+                alpha = 1.0f;
+            }
+            else {
+                alpha = 1.0f - (levelTransitionTimer - (FADE_TIME + HOLD_TIME)) / FADE_TIME;
+            }
+
+            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ColorAlpha(BLACK, alpha));
+
+            if (alpha > 0.95f) {
+                DrawLevelUpScreen();
+            }
+            break;
+        }
+
+        EndDrawing(); //display the frame
+    }
+
+    // 4. cleanup
+    UnloadAllTextures();
+    CloseWindow();
+    return 0; // everything ran successfully
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // function for alien grid setup
 void SetupUfos(int rows, int cols) {
     currentUfosAlive = 0;
