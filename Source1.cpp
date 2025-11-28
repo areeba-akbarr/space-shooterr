@@ -40,6 +40,7 @@ void SetupUfos(int rows, int cols) {
 	34
 }
 
+
 int main()
 {
 	cout << "hello world ";
