@@ -181,14 +181,3 @@ void CheckHits() {
     }
 }
 
-
-
-=======
-void LoadScoreFile();
-void SaveScoreFile();
->>>>>>> 58d2f9a6bb09f2d937ed5aacbdac4ae7d5d2cca8
-int main()
-{
-	
-}
-
