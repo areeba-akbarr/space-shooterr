@@ -3,7 +3,15 @@
 using namespace std;
 void LoadScoreFile();
 void SaveScoreFile();
-
+GameStatus gameStatus = INTRO_MENU;
+int currentLevel = 1;
+float ufoMoveTimer = 0.0f;
+float ufoMoveDirection = 1.0f;
+float timeSinceLastUfoShot = 0.0f;
+int highScore = 0;
+int currentUfosAlive = 10;
+int gridRows = 2;
+int gridCols = 5;
 
 // function for alien grid setup
 
