@@ -119,6 +119,53 @@ void UfoShooting(float frameTime) {
 }
 
 
+// Updates the position of all active bullets and removes them if they go off-screen.
+void MoveShots(float frameTime) {
+    for (int i = 0; i < MAX_SHOTS; i++) {
+        if (allShots[i].isActive) {
+            if (allShots[i].firedByUfo) {
+                allShots[i].hitBox.y += allShots[i].speedVal;
+            }
+            else {
+                allShots[i].hitBox.y -= allShots[i].speedVal;
+            }
+
+            if (allShots[i].hitBox.y < -allShots[i].hitBox.height ||
+                allShots[i].hitBox.y > static_cast<float>(SCREEN_HEIGHT)) {
+                allShots[i].isActive = false;
+            }
+        }
+    }
+}
+
+// Handles all collision detection between bullets, ships, and walls.
+void CheckHits() {
+    for (int i = 0; i < MAX_SHOTS; i++) {
+        if (allShots[i].isActive) {
+
+            // 1. Check against Defense Walls
+            bool shotDestroyedByWall = false;
+            for (int w = 0; w < NUM_WALLS; w++) {
+                if (CheckCollisionRecs(allShots[i].hitBox, allWalls[w].hitBox)) {
+                    allShots[i].isActive = false;
+                    shotDestroyedByWall = true;
+                    break;
+                }
+            }
+            if (shotDestroyedByWall) continue;
+
+            if (allShots[i].firedByUfo) {
+				// alien and player vs shot
+                if (CheckCollisionRecs(allShots[i].hitBox, thePlayer.hitBox)) {
+                    allShots[i].isActive = false;
+                    thePlayer.livesLeft--;
+                }
+            }
+            else {
+                // 3. Player Shot vs alein
+                int maxUfosActive
+
+
 
 =======
 void LoadScoreFile();
