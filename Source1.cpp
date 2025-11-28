@@ -106,10 +106,37 @@ DefenseWall allWalls[NUM_WALLS];
 Spark allSparks[MAX_SPARKS];
 
 
-
-
+//functions used
 void LoadScoreFile();
 void SaveScoreFile();
+int KeepInBounds(int value, int min, int max);
+void LoadAllTextures();
+void UnloadAllTextures();
+void InitializeGame();
+void SetupUfos(int rows, int cols);
+void SetupWalls();
+void SetupSparks();
+void UpdateEverything(float frameTime);
+void AdvanceLevel();
+void CheckIfLevelWon();
+void MoveShip(float frameTime);
+void FireShot(Rectangle sourceBox, bool isUfo, float offsetX);
+void FireTripleShot();
+void MoveUfos(float frameTime);
+void UfoShooting(float frameTime);
+void MoveShots(float frameTime);
+void CheckHits();
+void UpdateSparks(float frameTime);
+void DrawGameElements();
+void DrawSparks();
+void DrawTheMenu();
+void DrawHowToPlay();
+void DrawEndScreen();
+void DrawPauseScreen();
+void DrawLevelUpScreen();
+
+
+
 // function for alien grid setup
 
 void SetupUfos(int rows, int cols) {
