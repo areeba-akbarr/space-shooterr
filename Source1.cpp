@@ -1,15 +1,15 @@
 #include <iostream>
-#include "raylib.h"     
-#include <cstdlib>      
+#include "raylib.h"     // used to include graphics
+#include <cstdlib>      // mostly to use rand function
 #include <time.h>       
 #include <cmath>        
 #include <cstdio>
 using namespace std;
 
 //game constants
-const int SCREEN_WIDTH = 1280;
-const int SCREEN_HEIGHT = 800;
-const int MAX_UFOS = 50;
+const int SCREEN_WIDTH = 1280;   
+const int SCREEN_HEIGHT = 800;   
+const int MAX_UFOS = 50;         
 const int MAX_SHOTS = 20;
 const int MAX_SPARKS = 100;
 const int NUM_WALLS = 4;
@@ -182,8 +182,8 @@ int main(void) {
 
     // 1. Setup
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Space Shooter - Survivors");
-    SetTargetFPS(60); 
-    srand(static_cast<unsigned int>(time(NULL)));
+    SetTargetFPS(60); // 60 frames per sec
+    srand(static_cast<unsigned int>(time(NULL))); //initializing randomizer
 
     // loading
     LoadScoreFile();
@@ -191,13 +191,13 @@ int main(void) {
     SetupSparks();
     InitializeGame();
 
-    // 2.Game Loop
+    // 2.Game Loop runs till user closes window
     while (!WindowShouldClose()) {
-        float frameTime = GetFrameTime(); 
+        float frameTime = GetFrameTime(); //time passed since last screen update
 
         UpdateSparks(frameTime); //background starry
 
-        
+        //depending on where we are menu,game etc corresponding action takes place
         switch (gameStatus) {
         case INTRO_MENU:
             if (IsKeyPressed(KEY_ENTER)) {
@@ -224,23 +224,23 @@ int main(void) {
                 gameStatus = IN_GAME;
             }
             break;
-        case LEVEL_UP: 
-            levelTransitionTimer += frameTime; 
+        case LEVEL_UP: //for smooth transition between levels
+            levelTransitionTimer += frameTime; //increment the timer
 
             
             if (levelTransitionTimer >= FADE_TIME && !levelResetExecuted) {
                 AdvanceLevel();
-                levelResetExecuted = true;
+                levelResetExecuted = true; //set flag so this only runs 
             }
 
-            
+            //transition time up then resume the game 
             if (levelTransitionTimer >= TOTAL_TRANSITION_TIME) {
                 gameStatus = IN_GAME;
                 levelTransitionTimer = 0.0f;
             }
             break;
         case END_SCREEN:
-            
+            //check if current score is the new highscore
             if (thePlayer.playerScore > highScore) {
                 highScore = thePlayer.playerScore;
                 SaveScoreFile();
