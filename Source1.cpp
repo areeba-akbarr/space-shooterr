@@ -47,6 +47,53 @@ void SetupUfos(int rows, int cols) {
 }
 
 
+// this is for controlooing the lien up down movement and shifts
+void MoveUfos(float frameTime) {
+    ufoMoveTimer += frameTime;
+    if (ufoMoveTimer < BASE_UFO_TIME / static_cast<float>(currentLevel))
+        return;
+
+    ufoMoveTimer = 0.0f;
+
+    bool hitWall = false;
+    float currentSpeed = UFO_X_SPEED * (0.8f + static_cast<float>(currentLevel) * 0.2f);
+
+    int maxUfosActive = gridRows * gridCols;
+    if (maxUfosActive > MAX_UFOS)
+        maxUfosActive = MAX_UFOS;
+
+    for (int i = 0; i < maxUfosActive; i++) {
+        if (allUfos[i].isAlive) {
+
+            // Move left or right
+            allUfos[i].hitBox.x += currentSpeed * ufoMoveDirection;
+
+            // Check wall collision
+            if (allUfos[i].hitBox.x <= 0 ||
+                allUfos[i].hitBox.x >= static_cast<float>(SCREEN_WIDTH) - allUfos[i].hitBox.width) {
+                hitWall = true;
+            }
+
+            // Check if aliens reached near bottom of screen, if yes end screen will show
+            if (allUfos[i].hitBox.y + allUfos[i].hitBox.height >=
+                static_cast<float>(SCREEN_HEIGHT) - 100) {
+                gameStatus = END_SCREEN;
+            }
+        }
+    }
+
+    // If any aliens hits a wall then reverse direction and move down
+    if (hitWall) {
+        ufoMoveDirection *= -1.0f;
+
+        for (int i = 0; i < maxUfosActive; i++) {
+            if (allUfos[i].isAlive) {
+                allUfos[i].hitBox.y += UFO_Y_DROP;
+            }
+        }
+    }
+}
+
 
 
 
