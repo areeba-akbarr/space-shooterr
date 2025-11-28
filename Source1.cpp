@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstdio >
 using namespace std;
-<<<<<<< HEAD
+
 
 
 // function for alien grid setup
