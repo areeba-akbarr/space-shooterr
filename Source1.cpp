@@ -38,9 +38,9 @@ const float TOTAL_TRANSITION_TIME = FADE_TIME * 2 + HOLD_TIME;
 
 //structd
 
-struct GamerShip {
-    Rectangle hitBox;
-    float speed = SHIP_MOVE_SPEED;
+struct GamerShip { 
+    Rectangle hitBox; //location of ship and its size 
+    float speed = SHIP_MOVE_SPEED; //current player speed 
     int livesLeft = 3;
     int playerScore = 0;
     float fireCooldown = 0.0f;
@@ -49,37 +49,37 @@ struct GamerShip {
 
 //enemy
 struct Ufo {
-    Rectangle hitBox;
-    bool isAlive = false;
+    Rectangle hitBox; //enemy location and size 
+    bool isAlive = false;  //enemy slot active?
     float fireTimer = 0.0f;
     const float UFO_FIRE_RATE = 2.0f;
 };
 
 struct LaserShot {
-    Rectangle hitBox;
+    Rectangle hitBox; //bullet location and size 
     bool isActive = false;
     float speedVal = 0.0f;
     bool firedByUfo = false;
 };
 
 struct Spark {
-    Vector2 pos;
-    Vector2 velocity;
+    Vector2 pos;//star position in space 
+    Vector2 velocity; //star speed and direction 
     float size;
     Color sparkColor;
     bool isVisible = false;
 };
 
 struct DefenseWall {
-    Rectangle hitBox;
+    Rectangle hitBox; //wall location and size 
     int hitPoints = 4;
 };
 
-
+//to switch between where player is in the game 
 enum GameStatus {
     INTRO_MENU, HOW_TO_PLAY, IN_GAME, PAUSED_GAME, END_SCREEN, LEVEL_UP
 };
-
+//initialising global variables 
 GameStatus gameStatus = INTRO_MENU;
 int currentLevel = 1;
 float ufoMoveTimer = 0.0f;
@@ -134,17 +134,19 @@ void DrawHowToPlay();
 void DrawEndScreen();
 void DrawPauseScreen();
 void DrawLevelUpScreen();
-
+//saves the current highscore 
 void SaveScoreFile() {
     FILE* file = fopen("top_score.txt", "w");
     if (file) {
-        fprintf(file, "%d", highScore);
+        fprintf(file, "%d", highScore); //write the no
         fclose(file);
     }
 }
+//loads highhscore from text file 
 void LoadScoreFile() {
     FILE* file = fopen("top_score.txt", "r");
     if (file) {
+        //reads one integer from file into the highscore variable 
         if (fscanf(file, "%d", &highScore) != 1) {
             highScore = 0;
         }
@@ -152,7 +154,7 @@ void LoadScoreFile() {
     }
 }
 
-
+//keep val btw max and min
 int KeepInBounds(int value, int min, int max) {
     if (value < min) return min;
     if (value > max) return max;
@@ -543,12 +545,13 @@ void MoveUfos(float frameTime) {
     ufoMoveTimer = 0.0f;
 
     bool hitWall = false;
+    //calculates speed which increases the level
     float currentSpeed = UFO_X_SPEED * (0.8f + static_cast<float>(currentLevel) * 0.2f);
 
     int maxUfosActive = gridRows * gridCols;
     if (maxUfosActive > MAX_UFOS)
         maxUfosActive = MAX_UFOS;
-
+    //move all active enemies 
     for (int i = 0; i < maxUfosActive; i++) {
         if (allUfos[i].isAlive) {
 
