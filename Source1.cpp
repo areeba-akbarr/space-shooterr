@@ -257,7 +257,7 @@ int main(void) {
 
         DrawSparks(); //stars
 
-        
+        //draw content depending on the current state
         switch (gameStatus) {
         case INTRO_MENU:
             DrawTheMenu();
@@ -273,25 +273,28 @@ int main(void) {
             break;
         case END_SCREEN:
             DrawGameElements(); 
-            DrawEndScreen();   
+            DrawEndScreen();   //draw the "game over" display
             break;
         case LEVEL_UP:
-            DrawGameElements(); 
+            DrawGameElements(); //keep old game state visible during the fade out
 
-            float alpha = 0.0f; .
+            float alpha = 0.0f; //opacity of black screen (0 = transparent, 1 = solid)
 
             if (levelTransitionTimer < FADE_TIME) {
+                //screen turns solid
                 alpha = levelTransitionTimer / FADE_TIME;
             }
             else if (levelTransitionTimer < FADE_TIME + HOLD_TIME) {
+                //screen is solid
                 alpha = 1.0f;
             }
             else {
+                //screen turns transparent 
                 alpha = 1.0f - (levelTransitionTimer - (FADE_TIME + HOLD_TIME)) / FADE_TIME;
             }
-
+            //draw the fading black screen over everything else 
             DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ColorAlpha(BLACK, alpha));
-
+            //only draw the text when screen is dark enough to read
             if (alpha > 0.95f) {
                 DrawLevelUpScreen();
             }
@@ -312,7 +315,9 @@ int main(void) {
 //starry background
 void SetupSparks() {
     for (int i = 0; i < MAX_SPARKS; i++) {
+        //give the star a random spot on the screen 
         allSparks[i].pos = (Vector2){ static_cast<float>(rand() % SCREEN_WIDTH), static_cast<float>(rand() % SCREEN_HEIGHT) };
+        //slowly move star down the screen 
         allSparks[i].velocity = (Vector2){ 0.0f, 0.1f + static_cast<float>(rand() % 10) / 10.0f };
         allSparks[i].size = static_cast<float>(rand() % 2) + 1.0f;
         allSparks[i].sparkColor = WHITE;
@@ -328,9 +333,10 @@ void InitializeGame() {
     ufoMoveTimer = 0.0f;
     ufoMoveDirection = 1.0f;
     timeSinceLastUfoShot = 0.0f;
+    //reset transition variables 
     levelTransitionTimer = 0.0f;
     levelResetExecuted = false;
-
+    //put the player ship in its starting position 
     thePlayer.hitBox = { SCREEN_WIDTH / 2.0f - SHIP_W / 2.0f,
                        static_cast<float>(SCREEN_HEIGHT) - SHIP_H - 30,
                        static_cast<float>(SHIP_W), static_cast<float>(SHIP_H) };
@@ -338,13 +344,13 @@ void InitializeGame() {
     thePlayer.playerScore = 0;
     thePlayer.fireCooldown = 0.0f;
     thePlayer.tripleShotCooldown = 0.0f;
-
+    //clear all existing bullets 
     for (int i = 0; i < MAX_SHOTS; i++) {
         allShots[i].isActive = false;
     }
 
-    SetupWalls(); 
-    SetupUfos(gridRows, gridCols); 
+    SetupWalls(); //place the defense barriers 
+    SetupUfos(gridRows, gridCols); //place enemies 
 }
 
 
@@ -383,7 +389,7 @@ void SetupUfos(int rows, int cols) {
                                   static_cast<float>(UFO_W),
                                   static_cast<float>(UFO_H) };
 
-            currentUfosAlive++;
+            currentUfosAlive++; //count the new enemies 
         }
     }
 }
@@ -438,7 +444,7 @@ void UpdateEverything(float frameTime) {
 // checks if player defeated all enemies in current wave
 void CheckIfLevelWon() {
     if (currentUfosAlive <= 0) {
-        // We won! Start the fading transition.
+        // we won! Start the fading transition.
         levelTransitionTimer = 0.0f;
         levelResetExecuted = false;
         gameStatus = LEVEL_UP;
@@ -494,7 +500,7 @@ void MoveShip(float frameTime) {
 
 // finds empty slot launches a single bullet
 void FireShot(Rectangle sourceBox, bool isUfo, float offsetX) {
-    
+    //looks for first inactive shot slot 
     for (int i = 0; i < MAX_SHOTS; i++) {
         if (!allShots[i].isActive) {
             allShots[i].isActive = true;
@@ -512,7 +518,7 @@ void FireShot(Rectangle sourceBox, bool isUfo, float offsetX) {
                 allShots[i].speedVal = 15.0f;
                 allShots[i].hitBox.y = sourceBox.y - allShots[i].hitBox.height;
             }
-
+            //centre the shot with optional offset for triple shot spread
             allShots[i].hitBox.x = sourceBox.x + sourceBox.width / 2 - allShots[i].hitBox.width / 2 + offsetX;
             break;
         }
