@@ -155,15 +155,31 @@ void CheckHits() {
             if (shotDestroyedByWall) continue;
 
             if (allShots[i].firedByUfo) {
-				// alien and player vs shot
+                // 2. alien Shot vs the player shots
                 if (CheckCollisionRecs(allShots[i].hitBox, thePlayer.hitBox)) {
                     allShots[i].isActive = false;
                     thePlayer.livesLeft--;
                 }
             }
             else {
-                // 3. Player Shot vs alein
-                int maxUfosActive
+                // 3. Player Shot vs alien
+                int maxUfosActive = gridRows * gridCols;
+                if (maxUfosActive > MAX_UFOS) maxUfosActive = MAX_UFOS;
+
+                for (int j = 0; j < maxUfosActive; j++) {
+                    if (allUfos[j].isAlive &&
+                        CheckCollisionRecs(allShots[i].hitBox, allUfos[j].hitBox)) {
+                        allUfos[j].isAlive = false;
+                        allShots[i].isActive = false;
+                        thePlayer.playerScore += 100;
+                        currentUfosAlive--;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
 
 
 
