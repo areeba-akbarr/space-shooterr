@@ -12,6 +12,14 @@ int highScore = 0;
 int currentUfosAlive = 10;
 int gridRows = 2;
 int gridCols = 5;
+float levelTransitionTimer = 0.0f;
+bool levelResetExecuted = false;
+Texture2D shipTexture, ufoTexture, playerShotTexture, ufoShotTexture;
+GamerShip thePlayer;
+LaserShot allShots[MAX_SHOTS];
+Ufo allUfos[MAX_UFOS];
+DefenseWall allWalls[NUM_WALLS];
+Spark allSparks[MAX_SPARKS];
 
 // function for alien grid setup
 
