@@ -1,5 +1,8 @@
 #include <iostream>
+#include "GlobalState.h"
+#include <cstdio >
 using namespace std;
+<<<<<<< HEAD
 
 
 // function for alien grid setup
@@ -46,8 +49,11 @@ void SetupUfos(int rows, int cols) {
 
 
 
+=======
+void LoadScoreFile();
+void SaveScoreFile();
+>>>>>>> 58d2f9a6bb09f2d937ed5aacbdac4ae7d5d2cca8
 int main()
 {
-	cout << "hello world ";
-	return 0;
+	
 }
