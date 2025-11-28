@@ -135,6 +135,23 @@ void DrawEndScreen();
 void DrawPauseScreen();
 void DrawLevelUpScreen();
 
+void SaveScoreFile() {
+    FILE* file = fopen("top_score.txt", "w");
+    if (file) {
+        fprintf(file, "%d", highScore);
+        fclose(file);
+    }
+}
+void LoadScoreFile() {
+    FILE* file = fopen("top_score.txt", "r");
+    if (file) {
+        if (fscanf(file, "%d", &highScore) != 1) {
+            highScore = 0;
+        }
+        fclose(file);
+    }
+}
+
 
 int KeepInBounds(int value, int min, int max) {
     if (value < min) return min;
@@ -645,21 +662,133 @@ void CheckHits() {
         }
     }
 }
-void SaveScoreFile() {
-    FILE* file = fopen("top_score.txt", "w");
-    if (file) {
-        fprintf(file, "%d", highScore);
-        fclose(file);
-    }
-}
-void LoadScoreFile() {
-    FILE* file = fopen("top_score.txt", "r");
-    if (file) {
-        if (fscanf(file, "%d", &highScore) != 1) {
-            highScore = 0;
+
+
+
+
+// drawing
+
+// moving background
+void DrawSparks() {
+    for (int i = 0; i < MAX_SPARKS; i++) {
+        if (allSparks[i].isVisible) {
+            DrawCircleV(allSparks[i].pos, allSparks[i].size, allSparks[i].sparkColor);
         }
-        fclose(file);
     }
 }
+
+// drawing main objects / elements
+void DrawGameElements() {
+    int maxUfosActive = gridRows * gridCols;
+    if (maxUfosActive > MAX_UFOS) maxUfosActive = MAX_UFOS;
+
+    // draw ufos if alive
+    for (int i = 0; i < maxUfosActive; i++) {
+        if (allUfos[i].isAlive) {
+            
+            DrawTexturePro(ufoTexture,
+                (Rectangle) {
+                0.0f, 0.0f, static_cast<float>(ufoTexture.width), static_cast<float>(ufoTexture.height)
+            },
+                allUfos[i].hitBox,
+                (Vector2) {
+                0, 0
+            }, 0.0f, WHITE);
+        }
+    }
+
+    //draw ship
+    DrawTexturePro(shipTexture,
+        (Rectangle) {
+        0.0f, 0.0f, static_cast<float>(shipTexture.width), static_cast<float>(shipTexture.height)
+    },
+        thePlayer.hitBox,
+        (Vector2) {
+        0, 0
+    }, 0.0f, WHITE);
+
+    // draw shots
+    for (int i = 0; i < MAX_SHOTS; i++) {
+        if (allShots[i].isActive) {
+            Texture2D shotTex = allShots[i].firedByUfo ? ufoShotTexture : playerShotTexture;
+            DrawTexturePro(shotTex,
+                (Rectangle) {
+                0.0f, 0.0f, static_cast<float>(shotTex.width), static_cast<float>(shotTex.height)
+            },
+                allShots[i].hitBox,
+                (Vector2) {
+                0, 0
+            }, 0.0f, WHITE);
+        }
+    }
+
+    // draw walls
+    for (int i = 0; i < NUM_WALLS; i++) {
+        DrawRectangleRec(allWalls[i].hitBox, DARKGRAY);
+        DrawRectangleLinesEx(allWalls[i].hitBox, 2, WHITE);
+    }
+
+    // draw extra things ui
+    DrawText(TextFormat("SCORE: %06i", thePlayer.playerScore), 10, 10, 20, WHITE);
+    DrawText(TextFormat("LEVEL: %i", currentLevel), SCREEN_WIDTH / 2 - 50, 10, 20, WHITE);
+
+    const int LIVES_TEXT_SIZE = 20;
+    const char* livesText = TextFormat("LIVES: %i", thePlayer.livesLeft);
+    int livesTextWidth = MeasureText(livesText, LIVES_TEXT_SIZE);
+    DrawText(livesText, SCREEN_WIDTH - livesTextWidth - 10, 10, LIVES_TEXT_SIZE, WHITE);
+
+    // triple shot timer
+    Color cdColor = thePlayer.tripleShotCooldown <= 0.0f ? LIME : RED;
+    DrawText(TextFormat("TRIPLE SHOT CD: %.1f", thePlayer.tripleShotCooldown > 0.0f ? thePlayer.tripleShotCooldown : 0.0f), 10, 40, 20, cdColor);
+}
+
+//main title
+void DrawTheMenu() {
+    DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ColorAlpha(DARKBLUE, 0.8f));
+    DrawText("SPACE SHOOTER: VIRUS DEFENDER", SCREEN_WIDTH / 2 - MeasureText("SPACE SHOOTER: VIRUS DEFENDER", 60) / 2, 100, 60, WHITE);
+
+    DrawText(TextFormat("HIGH SCORE: %06i", highScore), SCREEN_WIDTH / 2 - MeasureText("HIGH SCORE: 000000", 30) / 2, 250, 30, GOLD);
+
+    DrawText("Press ENTER to START", SCREEN_WIDTH / 2 - MeasureText("Press ENTER to START", 30) / 2, 350, 30, GREEN);
+    DrawText("Press I for INSTRUCTIONS", SCREEN_WIDTH / 2 - MeasureText("Press I for INSTRUCTIONS", 30) / 2, 400, 30, SKYBLUE);
+}
+
+//instructions
+void DrawHowToPlay() {
+    DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ColorAlpha(DARKBLUE, 0.9f));
+    DrawText("INSTRUCTIONS", SCREEN_WIDTH / 2 - MeasureText("INSTRUCTIONS", 50) / 2, 50, 50, WHITE);
+    DrawText("Use LEFT/RIGHT (or A/D) to move your ship.", 50, 150, 30, LIGHTGRAY);
+    DrawText("Press SPACE (or Left Click) to fire bullets.", 50, 200, 30, LIGHTGRAY);
+    DrawText("Press B for a powerful TRIPLE SHOT.", 50, 250, 30, YELLOW);
+    DrawText("Destroy all viruses to advance to the next level.", 50, 300, 30, LIGHTGRAY);
+    DrawText("The permanent BARRIERS STOP ALL BULLETS and protect the player.", 50, 350, 30, LIGHTGRAY);
+    DrawText("You get an extra life every 3 levels.", 50, 400, 30, LIGHTGRAY);
+    DrawText("Press ESCAPE to return to Menu", 50, SCREEN_HEIGHT - 50, 30, RED);
+}
+
+//gameover
+void DrawEndScreen() {
+    DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ColorAlpha(RED, 0.9f));
+    DrawText("GAME OVER!", SCREEN_WIDTH / 2 - MeasureText("GAME OVER!", 80) / 2, 200, 80, WHITE);
+    DrawText(TextFormat("FINAL SCORE: %06i", thePlayer.playerScore), SCREEN_WIDTH / 2 - MeasureText("FINAL SCORE: 000000", 30) / 2, 360, 30, LIME);
+    DrawText(TextFormat("HIGH SCORE: %06i", highScore), SCREEN_WIDTH / 2 - MeasureText("HIGH SCORE: 000000", 30) / 2, 410, 30, GOLD);
+    DrawText("Press ENTER to return to Menu", SCREEN_WIDTH / 2 - MeasureText("Press ENTER to return to Menu", 30) / 2, 550, 30, YELLOW);
+}
+
+//puase
+void DrawPauseScreen() {
+    DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, ColorAlpha(BLACK, 0.5f));
+    DrawText("PAUSED", SCREEN_WIDTH / 2 - MeasureText("PAUSED", 80) / 2, 200, 80, WHITE);
+    DrawText("Press P or ENTER to CONTINUE", SCREEN_WIDTH / 2 - MeasureText("Press P or ENTER to CONTINUE", 30) / 2, 350, 30, GREEN);
+}
+
+//transition state between two states
+void DrawLevelUpScreen() {
+    DrawText(TextFormat("LEVEL %i CLEARED!", currentLevel - 1), SCREEN_WIDTH / 2 - MeasureText("LEVEL X CLEARED!", 60) / 2, 200, 60, WHITE);
+    DrawText(TextFormat("SCORE: %06i", thePlayer.playerScore), SCREEN_WIDTH / 2 - MeasureText("SCORE: 000000", 40) / 2, 350, 40, GOLD);
+    DrawText(TextFormat("GET READY FOR LEVEL %i", currentLevel), SCREEN_WIDTH / 2 - MeasureText("GET READY FOR LEVEL XX", 30) / 2, 450, 30, LIME);
+}
+
+
 
 
