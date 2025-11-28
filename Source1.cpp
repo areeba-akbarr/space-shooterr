@@ -527,7 +527,7 @@ void FireShot(Rectangle sourceBox, bool isUfo, float offsetX) {
     }
 }
 
-
+//fire three player shots 
 void FireTripleShot() {
     thePlayer.tripleShotCooldown = TRIPLE_SHOT_DELAY;
     FireShot(thePlayer.hitBox, false, -20.0f); //left
