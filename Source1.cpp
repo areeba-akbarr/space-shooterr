@@ -3,24 +3,6 @@
 using namespace std;
 void LoadScoreFile();
 void SaveScoreFile();
-GameStatus gameStatus = INTRO_MENU;
-int currentLevel = 1;
-float ufoMoveTimer = 0.0f;
-float ufoMoveDirection = 1.0f;
-float timeSinceLastUfoShot = 0.0f;
-int highScore = 0;
-int currentUfosAlive = 10;
-int gridRows = 2;
-int gridCols = 5;
-float levelTransitionTimer = 0.0f;
-bool levelResetExecuted = false;
-Texture2D shipTexture, ufoTexture, playerShotTexture, ufoShotTexture;
-GamerShip thePlayer;
-LaserShot allShots[MAX_SHOTS];
-Ufo allUfos[MAX_UFOS];
-DefenseWall allWalls[NUM_WALLS];
-Spark allSparks[MAX_SPARKS];
-
 // function for alien grid setup
 
 void SetupUfos(int rows, int cols) {
