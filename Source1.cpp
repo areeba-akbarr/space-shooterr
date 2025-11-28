@@ -187,5 +187,14 @@ void SaveScoreFile() {
         fclose(file);
     }
 }
+void LoadScoreFile() {
+    FILE* file = fopen("top_score.txt", "r");
+    if (file) {
+        if (fscanf(file, "%d", &highScore) != 1) {
+            highScore = 0;
+        }
+        fclose(file);
+    }
+}
 
 
