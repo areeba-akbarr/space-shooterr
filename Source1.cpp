@@ -136,9 +136,31 @@ void DrawPauseScreen();
 void DrawLevelUpScreen();
 
 
+int KeepInBounds(int value, int min, int max) {
+    if (value < min) return min;
+    if (value > max) return max;
+    return value;
+}
+
+//loading images 
+void LoadAllTextures() {
+    shipTexture = LoadTexture("player_texture.png");
+    ufoTexture = LoadTexture("enemy_texture.png");
+    playerShotTexture = LoadTexture("player_bullet.png");
+    ufoShotTexture = LoadTexture("enemy_bullet.png");
+   
+}
+
+// cleans up the memory used by the images when the game closes.
+void UnloadAllTextures() {
+    UnloadTexture(shipTexture);
+    UnloadTexture(ufoTexture);
+    UnloadTexture(playerShotTexture);
+    UnloadTexture(ufoShotTexture);
+}
+
 
 // function for alien grid setup
-
 void SetupUfos(int rows, int cols) {
     currentUfosAlive = 0;
 
