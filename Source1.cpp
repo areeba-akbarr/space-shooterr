@@ -93,6 +93,30 @@ void MoveUfos(float frameTime) {
     }
 }
 
+// function to control when and how aliens should shoot
+void UfoShooting(float frameTime) {
+    timeSinceLastUfoShot += frameTime;
+
+    const float BASE_UFO_FIRE_INTERVAL = 1.0f;
+    float fireInterval = BASE_UFO_FIRE_INTERVAL / (0.5f + static_cast<float>(currentLevel) * 0.5f);
+
+    if (timeSinceLastUfoShot >= fireInterval && currentUfosAlive > 0) {
+        timeSinceLastUfoShot = 0.0f;
+
+        int aliveIndices[MAX_UFOS];
+        int count = 0;
+        for (int i = 0; i < MAX_UFOS; i++) {
+            if (allUfos[i].isAlive) {
+                aliveIndices[count++] = i;
+            }
+        }
+
+        if (count > 0) {
+            int targetIndex = aliveIndices[rand() % count];
+            FireShot(allUfos[targetIndex].hitBox, true, 0.0f);
+        }
+    }
+}
 
 
 
