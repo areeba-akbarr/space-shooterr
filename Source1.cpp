@@ -180,4 +180,12 @@ void CheckHits() {
         }
     }
 }
+void SaveScoreFile() {
+    FILE* file = fopen("top_score.txt", "w");
+    if (file) {
+        fprintf(file, "%d", highScore);
+        fclose(file);
+    }
+}
+
 
